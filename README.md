@@ -6,7 +6,7 @@ Dieses Projekt ist ein angepasster Fork von **[ESP32-DualCAN / Dorky Commander](
 
 ## Änderungen & Herkunftshinweis (gemäß CERN-OHL-W)
 
-Gemäß Abschnitt 3.3(b) der **CERN Open Hardware Licence Version 2 - Weakly Reciprocal (CERN-OHL-W)** wurden am **19.11.2026** von **[Dein Name/Handle]** folgende Änderungen am Originalprojekt vorgenommen:
+Gemäß Abschnitt 3.3(b) der **CERN Open Hardware Licence Version 2 - Weakly Reciprocal (CERN-OHL-W)** wurden am **19.11.2026** von **[akammo99]** folgende Änderungen am Originalprojekt vorgenommen:
 
 * **Pinout-Anpassung:** Das Pinout der Firmware wurde für das **Waveshare ESP32-C6-Zero** Board angepasst.
 * **3D-Gehäuse hinzugefügt:** Ein passendes 3D-druckbares Gehäuse wurde konstruiert, da die Waveshare-Platine von der anderen Seite angelötet wird.
