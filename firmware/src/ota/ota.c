@@ -12,6 +12,7 @@
 
 #include "ota/ota.h"
 
+#include <inttypes.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -32,6 +33,44 @@ static size_t s_written = 0;
 void ota_init(void)
 {
     /* Nothing to do — state is all zeroed. */
+}
+
+bool ota_confirm_running_image(void)
+{
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    if (!running) {
+        ESP_LOGE(TAG, "cannot confirm OTA image: no running partition");
+        return false;
+    }
+
+    esp_ota_img_states_t state = ESP_OTA_IMG_UNDEFINED;
+    esp_err_t err = esp_ota_get_state_partition(running, &state);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "cannot read OTA state for %s: %s",
+                 running->label, esp_err_to_name(err));
+        return false;
+    }
+
+    if (state == ESP_OTA_IMG_VALID) {
+        return true; /* already confirmed; normal on non-pending boots */
+    }
+
+    if (state != ESP_OTA_IMG_PENDING_VERIFY) {
+        ESP_LOGI(TAG, "running image %s does not need confirmation (state=%d)",
+                 running->label, (int)state);
+        return true;
+    }
+
+    err = esp_ota_mark_app_valid_cancel_rollback();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "failed to confirm OTA image %s: %s",
+                 running->label, esp_err_to_name(err));
+        return false;
+    }
+
+    ESP_LOGI(TAG, "OTA image %s confirmed valid; rollback cancelled",
+             running->label);
+    return true;
 }
 
 bool ota_in_progress(void)

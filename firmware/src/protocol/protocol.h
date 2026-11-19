@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DORKY_FIRMWARE_VERSION
-#define DORKY_FIRMWARE_VERSION "0.0.1-dev"
+#define DORKY_FIRMWARE_VERSION "1.2"
 #endif
 
 /*

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { app } from '../lib/app';
+  import { app } from '../lib/store.svelte';
   import type { LogLevel } from '../transport/protocol';
   import Icon from './Icon.svelte';
 

@@ -1,18 +1,7 @@
 // Minimal service worker — existence enables PWA installability.
-// Network-first for everything: a cached shell or asset must never outlive
-// the network copy, otherwise a restart or redeploy leaves the app unstyled
-// until the user clears site data.
-//
-// A successful response is saved, so a start with no connection finds the
-// bundles and not just the precached shell.
-const CACHE = 'dorky-v3';
-
-// The worker is served next to the app, so the deployment base is the
-// directory this file lives in. On a sub-path install the origin root
-// belongs to something else: asking it for the shell would either fail the
-// install or cache a page that has nothing to do with this app.
-const BASE = new URL('./', self.location).pathname;
-const PRECACHE = [`${BASE}`, `${BASE}manifest.json`, `${BASE}favicon.svg`];
+// No aggressive caching; the app needs BLE which requires HTTPS anyway.
+const CACHE = 'dorky-v1';
+const PRECACHE = ['/', '/manifest.json', '/favicon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -29,31 +18,15 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  const request = e.request;
-  if (request.method !== 'GET') return;
-  // Cross-origin traffic is none of the worker's business: an opaque
-  // response cannot be stored, and intercepting it only risks breaking a
-  // request the page is entitled to make.
-  if (new URL(request.url).origin !== self.location.origin) return;
-  e.respondWith(networkFirst(request));
+  // Navigation requests: network-first so updates land immediately.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match('/') ),
+    );
+    return;
+  }
+  // Assets: cache-first.
+  e.respondWith(
+    caches.match(e.request).then((hit) => hit ?? fetch(e.request)),
+  );
 });
-
-async function networkFirst(request) {
-  let response;
-  try {
-    response = await fetch(request);
-  } catch (err) {
-    const cached = await caches.match(request);
-    if (!cached) throw err;
-    return cached;
-  }
-  if (response.ok) {
-    try {
-      const cache = await caches.open(CACHE);
-      await cache.put(request, response.clone());
-    } catch {
-      // A full or blocked cache must not take the response down with it.
-    }
-  }
-  return response;
-}

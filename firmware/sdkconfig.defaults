@@ -10,9 +10,16 @@ CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
 CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
 # CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG is not set
 
+# Enable ESP-IDF OTA rollback: a newly booted OTA image must be confirmed
+# by the application, otherwise the bootloader can revert to the previous slot.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
 # LittleFS for scripts, DBC binaries, and web UI assets.
-CONFIG_ESP_PARTITION_TABLE_CUSTOM=y
-CONFIG_ESP_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_OFFSET=0x8000
+CONFIG_PARTITION_TABLE_MD5=y
 
 # Match the ESP32-C6-SuperMini module flash size. PlatformIO's board setting
 # also says 4 MB, but ESP-IDF's generated sdkconfig otherwise defaults to 2 MB.

@@ -1,68 +1,69 @@
-# Scripts — Gallery contributions
+Skripte — Beiträge zur Galerie (Tesla Model Y Legacy)
 
-The **Gallery → Scripts** tab in the web UI is built at compile time from this folder. No manual registry — drop a `.be` file here and it appears as a card. For the full Berry API, see [`docs/scripting.md`](../docs/scripting.md) (also opened via **Automations → Scripting Guide**).
+Der Tab Gallery → Scripts in der Web-UI (und der Android-APK) wird beim Kompilieren automatisch aus diesem Ordner erzeugt. Es ist keine manuelle Registrierung nötig – lege einfach eine .be-Datei hier ab, und sie erscheint direkt als Karte in der App. Die vollständige Berry-API findest du in docs/scripting.md (oder direkt in der App über Automations → Scripting Guide).
 
-> [!NOTE]
-> For now **only Tesla is supported and tested** (see `scripts/tesla/`). Other brand folders are reserved for future use.
+[!NOTE]
+Derzeit wird ausschließlich Tesla (Model Y / Model 3) unterstützt und ist auf der Hardware getestet (siehe scripts/tesla/).
 
-## Where to put files
+Speicherort der Dateien
 
-```
 scripts/
-  tesla/           # Tesla Model 3/Y, S/X, Cybertruck — currently supported
-  toyota/          # reserved for future
-  hyundai/         # reserved for future
-  README.md        # this file
-```
+  tesla/           # Tesla Model Y
+  README.md        # diese Datei
 
-- Use `scripts/<brand>/your_script.be` (lowercase brand folder, e.g. `tesla`). The Gallery filters cards by the vehicle picked in the status bar (`app.car.brand` → `examples.ts:11` / `GalleryView.svelte:11-16`) — non-Tesla brands will appear but are not yet validated on Dual-CAN hardware.
-- Also indexed: `firmware/test_scripts/*.be` (shown in the `Automations → Load…` dropdown, not Gallery).
 
-Source: `webui/src/examples.ts:7` — `import.meta.glob(['../../scripts/tesla/*.be', '../../firmware/test_scripts/*.be'], { query: '?raw' })`.
+Speichere deine Skripte unter scripts/tesla/dein_skript.be (der Ordnername tesla muss kleingeschrieben bleiben, damit die Galerie die Karten automatisch anzeigt, sobald das Tesla Model Y in der Statusleiste ausgewählt ist – geregelt über app.car.brand → examples.ts:11 / GalleryView.svelte:11-16).
 
-## Required header
+Ebenfalls indexiert werden Dateien unter firmware/test_scripts/*.be (diese erscheinen unter Automations → Load…, nicht in der Galerie).
 
-The first lines must be `# @` comments — they become the Gallery card title, description, and bus badge:
+Quelle: webui/src/examples.ts:7 — import.meta.glob(['../../scripts/tesla/*.be', '../../firmware/test_scripts/*.be'], { query: '?raw' }).
 
-```berry
-# @name My feature
-# @description What it does, when it triggers, and which bus/signal it uses
+Erforderlicher Datei-Header
+
+Die ersten Zeilen jedes Skripts müssen # @-Kommentare sein – daraus werden Titel, Beschreibung und Bus-Anzeige der Galerie-Karte generiert:
+
+# @name Meine Funktion
+# @description Was das Skript macht, wann es auslöst und welches Model-Y-Signal/Bus genutzt wird
 # @bus 0
-```
 
-- `@name` — card title (fallback: filename)
-- `@description` — card subtitle / search text (supports multi-line `@description` continuation)
-- `@bus` — `0` or `1` (default `0`) — shown as `bus 0` badge and used for DBC preprocessing examples
 
-Minimal skeleton (from `firmware/README.md`):
+@name — Kartentitel (Fallback: Dateiname)
 
-```berry
-# @name My script
-# @description What it does
+@description — Untertitel / Suchtext der Karte (mehrzeilige @description-Zeilen werden unterstützt)
+
+@bus — 0 oder 1 (Standard: 0) – wird als bus 0-Abzeichen angezeigt und für die DBC-Vorverarbeitung genutzt
+
+Minimales Grundgerüst (aus firmware/README.md):
+
+# @name Mein Model Y Skript
+# @description Beschreibung der Funktion
 
 def setup()
-  # called when the script is enabled
+  # wird beim Aktivieren des Skripts aufgerufen
   timer_every(1000, def()
     print("tick")
   end)
 end
 
 def teardown()
-  # called when the script is disabled (optional)
+  # wird beim Deaktivieren des Skripts aufgerufen (optional)
 end
-```
 
-See `scripts/tesla/hello_log.be` (minimal, no CAN) and `scripts/tesla/tesla_fold_mirror_tile.be` (two Dashboard tiles) for minimal examples.
 
-## Writing the script
+Minimale Praxisbeispiele findest du unter scripts/tesla/hello_log.be (einfaches Logging ohne CAN) und scripts/tesla/tesla_fold_mirror_tile.be (zwei Dashboard-Kacheln zum Einklappen der Spiegel).
 
-- The runtime invokes `setup()` on enable and `teardown()` on disable when present — a typical script registers timers, CAN callbacks, or Dashboard actions in `setup()` and releases them in `teardown()`.
-- Use `can_msg_get(bus, "MessageName")` / `msg_sig_get(msg, "SignalName")` with DBC names; they are rewritten at save time to numeric `sb/len/scale` args. See [`docs/scripting.md`](../docs/scripting.md) or the in-app **Automations → Scripting Guide** button for the full Berry API, timers, `action_register`, `led_set`, `state_*`, and syntax cheat sheet.
-- Don't do too crazy stuff in the scripts — they run on the ESP32-C6 with limited heap and CPU. Despite protections it's possible to get locked out from the BLE webui and need USB connection to factory reset in worst case.
+Skripte schreiben
 
-New scripts will appear in the gallery. No store update needed — Vite automatically pulls `.be` contents at dev/build time.
+Die Laufzeitumgebung ruft beim Aktivieren setup() und beim Deaktivieren (falls vorhanden) teardown() auf – typischerweise werden in setup() Timer, CAN-Callbacks oder Dashboard-Aktionen registriert und in teardown() wieder freigegeben.
 
-## Tips
+Nutze can_msg_get(bus, "MessageName") / msg_sig_get(msg, "SignalName") mit den DBC-Signalnamen des Model Y; beim Speichern werden diese automatisch in numerische sb/len/scale-Werte umgeschrieben. Details zu Timern, action_register, led_set, state_* und zur Syntax stehen in docs/scripting.md bzw. in der App unter Automations → Scripting Guide.
 
-- Point external AI agents to [`docs/scripting.md`](../docs/scripting.md) (raw: `https://raw.githubusercontent.com/opencartools/ESP32-DualCAN/main/docs/scripting.md`) — same guide the in-app AI edit tool uses.
-- Keep filenames `snake_case.be` — they are saved to the on-device LittleFS `/scripts/` path.
+Halte die Skripte schlank – sie laufen auf dem ESP32-C6 mit begrenztem Arbeitsspeicher (Heap) und CPU-Leistung. Trotz Schutzmechanismen kann ein überladenes Skript im schlimmsten Fall die BLE-Verbindung blockieren, sodass ein Werksreset per USB nötig wird.
+
+Neue Skripte erscheinen automatisch in der Galerie. Ein Store-Update ist nicht erforderlich – Vite bindet die .be-Inhalte beim Bauen der Web-UI/APK automatisch ein.
+
+Tipps
+
+Wenn du externe KI-Assistenten (oder OpenRouter in der APK) zum Schreiben von Model-Y-Skripten nutzt, verweise auf docs/scripting.md (Raw-Link: https://raw.githubusercontent.com/akammo99/ESP32-C6-Zero-DualCAN/main/docs/scripting.md) – das ist dieselbe Anleitung, die auch der integrierte KI-Editor verwendet.
+
+Verwende für Dateinamen durchgehend Kleinschreibung mit Unterstrichen (snake_case.be), da die Dateien auf dem ESP32-C6 im LittleFS-Pfad /scripts/ gespeichert werden.

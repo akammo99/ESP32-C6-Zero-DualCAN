@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { app } from '../../lib/app';
+  import { app } from '../../lib/store.svelte';
   import SectionHead from '../SectionHead.svelte';
   import Icon from '../Icon.svelte';
   import { Checkbox, Progress, AlertDialog } from 'bits-ui';
   import { onMount } from 'svelte';
   import { isIOS } from '../../lib/platform';
 
-  const GITHUB_REPO = 'opencartools/ESP32-DualCAN';
+  const GITHUB_REPO = 'dzid26/ESP32-DualCAN';
 
   // System info — refresh on connect.
   let protoVersion = $state<number | null>(null);
@@ -502,6 +502,21 @@
             style="font-size: 11px; color: var(--dc-accent); text-decoration: none">Token usage ↗</a>
         </div>
       </div>
+
+      <div class="field">
+        <span>Confirm vehicle writes</span>
+        <div class="row-flex" style="gap: 6px">
+          <Checkbox.Root class="cbx" checked={true} disabled={true}>{@render cbxMark()}</Checkbox.Root>
+          <span style="font-size: 12px; color: var(--dc-text-fade)">Always on — agent never auto-fires events that touch the bus</span>
+        </div>
+      </div>
+      <div class="field">
+        <span>Block while moving</span>
+        <div class="row-flex" style="gap: 6px">
+          <Checkbox.Root class="cbx" checked={true}>{@render cbxMark()}</Checkbox.Root>
+          <span style="font-size: 12px">Refuse vehicle writes when speed signal &gt; 5 mph</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -570,7 +585,7 @@
                     {ghDownloading ? 'Downloading…' : 'Download & flash'}
                   </button>
                   <a
-                    href={`https://github.com/opencartools/ESP32-DualCAN/releases/download/${ghRelease.tag}/dorky-commander-${ghRelease.tag.slice(1)}.bin`}
+                    href={`https://github.com/dzid26/ESP32-DualCAN/releases/download/${ghRelease.tag}/dorky-commander-${ghRelease.tag.slice(1)}.bin`}
                     class="btn btn--sm"
                     download
                     title="Download .bin file to upload manually"

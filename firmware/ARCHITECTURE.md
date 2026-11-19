@@ -196,7 +196,7 @@ end
 
 The framework calls `setup()` when the script is enabled and `teardown()` when disabled. Handler unregistration is automatic based on what `setup()` registered (each registration is tagged with the current script id and revoked on disable).
 
-**Scripts are purely reactive.** There is no `loop()` and no implicit tick. Periodic behavior uses `timer.every(ms, fn)`. On-demand behavior uses Actions (§7.8).
+**Scripts are purely reactive.** There is no `loop()` and no implicit tick. Periodic behavior uses `timer.every(ms, fn)`. Event-driven behavior uses `can.on(signal, fn)`. On-demand behavior uses Actions (§7.8).
 
 Shared helpers go in `/scripts/lib/*.be`, imported with `import lib.helper`.
 
@@ -206,7 +206,7 @@ Berry has a single global namespace. To stop scripts trampling each other:
 
 1. Each script is assigned a unique numeric `script_id` when loaded.
 2. The script's source is executed in a fresh-globals state — after running it, the framework captures references to `setup` / `teardown` (and any actions/handlers it registered) and clears those globals so the next script loads cleanly.
-3. Native bindings (`timer_every`, `action_register`, …) tag every registration with the current `script_id`. A stored callback re-installs its owner's id while it runs, so a timer or action registered from inside a timer callback or an action body inherits that owner. On `script_loader_disable`, the framework first calls the captured `teardown` ref, then revokes every registration tagged with that `script_id` — including ones `teardown` itself made.
+3. Native bindings (`can.on`, `timer.every`, `actions.register`, …) tag every registration with the current `script_id`. On `script_loader_disable`, the framework first calls the captured `teardown` ref (if any), then revokes every registration tagged with that `script_id`.
 4. Per-script state (`state.*`) uses an NVS namespace derived from the script filename, surviving disable/enable.
 
 ### 7.2 Enable/disable UI
@@ -266,7 +266,7 @@ def setup()
 end
 ```
 
-Actions are revoked when their script is disabled.
+Actions are revoked when their script is disabled (same lifecycle as `can.on`).
 
 ### 7.9 Scripting API reference (initial surface)
 
@@ -276,6 +276,9 @@ can.signal(name [, bus])            # -> Signal
   .value                            # current decoded value
   .prev                             # previous value
   .age_ms                           # ms since last rx
+
+can.on(name, fn [, bus])            # fn(sig) called when value changes
+                                    # use sig.prev inside fn for edge detection
 
 # ---- Messages (encode + send) ----
 can.message(name [, bus])           # -> Message (a draft from latest rx mirror)

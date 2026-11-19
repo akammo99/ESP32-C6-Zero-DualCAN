@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Dialog, Command } from 'bits-ui';
-  import { app } from '../lib/app';
-import type { ViewId } from '../lib/store.svelte';
+  import { app, type ViewId } from '../lib/store.svelte';
   import { NAV_ITEMS } from '../lib/nav';
 
   let { open, onClose }: { open: boolean; onClose: () => void } = $props();

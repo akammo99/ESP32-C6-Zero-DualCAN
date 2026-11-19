@@ -6,12 +6,7 @@
 import './helpers/test-globals.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BleTransport, type BleClientPort } from '../src/transport/ble.ts';
-
-/** Transport under test: mocked client, web platform. */
-function makeTransport(client: BleClientPort) {
-  return new BleTransport(client, () => true);
-}
+import { BleTransport } from '../src/transport/ble.ts';
 
 interface MockDevice {
   deviceId: string;
@@ -65,7 +60,7 @@ test('reconnect succeeds after an unexpected disconnect without a chooser', asyn
   t.mock.method(Date, 'now', () => now);
 
   const { client, state } = makeClient();
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
 
   const kinds: string[] = [];
   transport.onDisconnect((k) => kinds.push(k));
@@ -98,7 +93,7 @@ test('an immediate reconnect after a drop is single-shot and surfaces the failur
   t.mock.method(Date, 'now', () => now);
 
   const { client, state } = makeClient();
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
   const kinds: string[] = [];
   transport.onDisconnect((k) => kinds.push(k));
   await transport.connect();
@@ -136,7 +131,7 @@ test('persists deviceId/name in dc-ble-device and reuses them across instances',
   localStorage.clear();
 
   const { client, state } = makeClient({ device: { deviceId: 'dev-42', name: 'Dorky-BEEF' } });
-  const first = makeTransport(client);
+  const first = new BleTransport(client);
   await first.connect();
 
   assert.deepEqual(
@@ -158,7 +153,7 @@ test('persists deviceId/name in dc-ble-device and reuses them across instances',
   // reconnects the saved device with no chooser.
   const { client: client2, state: state2 } = makeClient({ device: { deviceId: 'other', name: 'Other' } });
   state2.devices = [{ deviceId: 'dev-42', name: 'Dorky-BEEF' }];
-  const second = makeTransport(client2);
+  const second = new BleTransport(client2);
   assert.equal(second.savedDeviceId, 'dev-42');
   assert.equal(second.savedDeviceName, 'Dorky-BEEF');
 
@@ -173,7 +168,7 @@ test('classifies user-initiated teardown apart from fast auth failures', async (
 
   // user disconnect
   const { client, state } = makeClient();
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
   const kinds: string[] = [];
   transport.onDisconnect((k) => kinds.push(k));
   await transport.connect();
@@ -183,7 +178,7 @@ test('classifies user-initiated teardown apart from fast auth failures', async (
 
   // immediate drop (< AUTH_FAIL_THRESHOLD_MS) is treated as an auth failure
   const { client: client2, state: state2 } = makeClient({ device: { deviceId: 'dev-9', name: 'Dorky-9999' } });
-  const transport2 = makeTransport(client2);
+  const transport2 = new BleTransport(client2);
   const kinds2: string[] = [];
   transport2.onDisconnect((k) => kinds2.push(k));
   await transport2.connect();
@@ -196,7 +191,7 @@ test('honours the firmware replacement signal and ignores a repeated disconnect'
   localStorage.clear();
 
   const { client, state } = makeClient();
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
   const kinds: string[] = [];
   transport.onDisconnect((k) => kinds.push(k));
   await transport.connect();
@@ -223,7 +218,7 @@ test('falls back to the picker when the saved device can no longer be reconnecte
     state.onDisconnect = onDisconnect;
   };
 
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
   await transport.connect();
 
   assert.deepEqual(state.connectCalls, ['fresh-1'], 'picker is used only after the saved device fails');
@@ -240,7 +235,7 @@ test('connectWithPicker opens the chooser even when a saved device exists', asyn
   t.mock.method(Date, 'now', () => now);
 
   const { client, state } = makeClient();
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
   const kinds: string[] = [];
   transport.onDisconnect((k) => kinds.push(k));
   await transport.connect();
@@ -263,7 +258,7 @@ test('forgetSavedDevice clears the persisted device so the next connect shows th
   localStorage.clear();
 
   const { client, state } = makeClient();
-  const transport = makeTransport(client);
+  const transport = new BleTransport(client);
   await transport.connect();
   assert.equal(transport.savedDeviceId, 'dev-1');
 

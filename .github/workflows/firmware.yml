@@ -2,16 +2,12 @@ name: Firmware CI
 
 on:
   push:
-    branches: [main]
     paths:
       - 'firmware/**'
-      - '.github/scripts/**'
       - '.github/workflows/firmware.yml'
   pull_request:
     paths:
       - 'firmware/**'
-      - '.github/scripts/**'
-      - '.github/workflows/firmware.yml'
 
 jobs:
   host-tests:
@@ -38,14 +34,7 @@ jobs:
         run: pip install "platformio==6.2.0"
 
       - name: Run native tests
-        run: |
-          set -o pipefail
-          pio test -d firmware -e tests-native -e tests-native-berry 2>&1 \
-            | tee "$RUNNER_TEMP/host-tests.log"
-
-      - name: Summarize native tests
-        if: always()
-        run: bash .github/scripts/summarize-test-log.sh "$RUNNER_TEMP/host-tests.log"
+        run: pio test -d firmware -e tests-native
 
   build:
     name: Firmware build

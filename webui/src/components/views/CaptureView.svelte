@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { app } from '../../lib/app';
+  import { app } from '../../lib/store.svelte';
   import type { TraceFrame } from '../../transport/protocol';
   import { dbcStore } from '../../dbcStore.svelte';
   import { evalCond, computeDiff, CONDS } from '../../lib/capture';

@@ -27,16 +27,16 @@
 
 static const char *TAG = "dorky";
 
-#define BLUE_LED_GPIO        GPIO_NUM_15
-#define BOOT_BTN_GPIO        GPIO_NUM_9
+#define BLUE_LED_GPIO        GPIO_NUM_3
+#define BOOT_BTN_GPIO        GPIO_NUM_5
 
-#define PIN_CAN0_TX     GPIO_NUM_2
-#define PIN_CAN0_RX     GPIO_NUM_1
-#define PIN_CAN0_STB    GPIO_NUM_19
+#define PIN_CAN0_TX     GPIO_NUM_18
+#define PIN_CAN0_RX     GPIO_NUM_15
+#define PIN_CAN0_STB    GPIO_NUM_1
 
-#define PIN_CAN1_TX     GPIO_NUM_4
-#define PIN_CAN1_RX     GPIO_NUM_3
-#define PIN_CAN1_STB    GPIO_NUM_18
+#define PIN_CAN1_TX     GPIO_NUM_20
+#define PIN_CAN1_RX     GPIO_NUM_19
+#define PIN_CAN1_STB    GPIO_NUM_2
 
 #define BITRATE_KBPS    500
 
@@ -111,6 +111,7 @@ void app_main(void)
      * buses come alive, or until this timeout fires. */
     const uint32_t STARTUP_DELAY_MS = 5000;
     bool scripts_restored = false;
+    bool ota_confirmation_attempted = false;
     uint32_t boot_ms = (uint32_t)(esp_timer_get_time() / 1000);
 
     uint32_t tick = 0;
@@ -130,6 +131,16 @@ void app_main(void)
                 script_loader_restore_enabled(&loader);
                 scripts_restored = true;
             }
+        }
+
+        /* Confirm a pending OTA image only after core services are running,
+         * persisted scripts have been restored, and the startup window passed.
+         * If the app crashes/resets before this point, the bootloader can roll
+         * back to the previous OTA slot (when rollback is enabled). */
+        if (!ota_confirmation_attempted && scripts_restored &&
+            (now - boot_ms) >= STARTUP_DELAY_MS) {
+            ota_confirmation_attempted = true;
+            (void)ota_confirm_running_image();
         }
 
         /* BOOT button (active-low).

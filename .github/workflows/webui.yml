@@ -2,32 +2,14 @@ name: WebUI CI
 
 on:
   push:
-    branches: [main]
     paths:
       - 'webui/**'
       - 'firmware/test_scripts/**'
-      - 'scripts/tesla/**'
-      - 'dbc/**'
-      - 'firmware/components/berry/src/be_lexer.c'
-      - 'firmware/components/berry/src/be_parser.c'
-      - 'firmware/components/berry/src/be_baselib.c'
-      - 'firmware/src/scripting/berry_bindings.c'
-      - 'firmware/tools/parse_check.c'
-      - 'firmware/tools/parse_check_examples.sh'
       - '.github/workflows/webui.yml'
   pull_request:
     paths:
       - 'webui/**'
       - 'firmware/test_scripts/**'
-      - 'scripts/tesla/**'
-      - 'dbc/**'
-      - 'firmware/components/berry/src/be_lexer.c'
-      - 'firmware/components/berry/src/be_parser.c'
-      - 'firmware/components/berry/src/be_baselib.c'
-      - 'firmware/src/scripting/berry_bindings.c'
-      - 'firmware/tools/parse_check.c'
-      - 'firmware/tools/parse_check_examples.sh'
-      - '.github/workflows/webui.yml'
 
 permissions:
   contents: read

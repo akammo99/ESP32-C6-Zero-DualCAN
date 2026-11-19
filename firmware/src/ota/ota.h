@@ -27,6 +27,11 @@ bool ota_in_progress(void);
  * so the serial log makes the swap obvious. */
 void ota_log_boot_info(void);
 
+/* Mark a newly booted OTA image as healthy after startup checks pass.
+ * Returns true when the image was confirmed (or was already valid).
+ * Returns false if rollback support is disabled or confirmation fails. */
+bool ota_confirm_running_image(void);
+
 /* Phase 1: prepare the next OTA partition.
  * Returns 0 on success, populating *max_size with the partition capacity.
  * On error returns -1 and writes a human-readable message into err_buf. */
