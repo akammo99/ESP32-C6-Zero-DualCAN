@@ -1,3 +1,5 @@
+> **Work in Progress:** Currently adapting this fork for the Waveshare ESP32-C6-Zero (Pinout, BLE fix, 3D enclosure, Android APK).
+
 # ESP32-DualCAN (Waveshare ESP32-C6-Zero Edition)
 
 Dieses Projekt ist ein angepasster Fork von **[ESP32-DualCAN / Dorky Commander]([Link zum Original-Repo])**, einer Open-Source-Alternative zum S3XY Commander mit Molex-Anschluss (kompatibel mit Enhauto-Kabelbäumen).
